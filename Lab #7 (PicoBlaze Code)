@@ -1,0 +1,78 @@
+;;============================================================================
+;; File: software.psm
+;; This is the PicoBlaze program for EE178 Lab #7.
+;;============================================================================
+
+;;============================================================================
+;; Port address declarations.
+;;============================================================================
+
+CONSTANT switches_lo     , 00 ; port for 8-bit switch input
+CONSTANT switches_hi     , 01 ; port for 8-bit switch input
+CONSTANT leds_lo         , 02 ; port for 8-bit led data out
+CONSTANT leds_hi         , 03 ; port for 8-bit led data out
+
+CONSTANT my_sid_lo       , 95 ; lo byte of student id (put yours here)
+CONSTANT my_sid_hi       , 12 ; hi byte of student id (put yours here)
+
+CONSTANT zero            , 00 ; zero
+CONSTANT one             , 01 ; one
+
+;;============================================================================
+;; Infinite loop.
+;;============================================================================
+
+         loop:  INPUT s0, switches_lo           ; get lo switch values
+                INPUT s1, switches_hi           ; get hi switch values
+		
+		LOAD s2, 00			; clear regester that stores swtich low information 
+		LOAD s3, 00			; clear regester that stores swtich high information
+		LOAD s4, 00			; clear regester that hold counter values
+		LOAD s5, 00			; clear regester for breaking counter loops
+
+		COMPARE s0, my_sid_lo		; compare low input switches with low id values
+		JUMP NZ, notEqual		; if both are equal, jump to outputting the switch values
+		COMPARE s1, my_sid_hi		; compare high input switches with hi id values
+		JUMP NZ, notEqual		; if both are equal, jump to outputting the switch values
+
+		OUTPUT s0, leds_lo  	        ; put lo led values
+		OUTPUT s1, leds_hi           	; put hi led values
+		JUMP loop                       ; go back and repeat
+
+      notEqual: LOAD s2, s0		   	; load the bottom numbers
+		LOAD s3, s1		   	; load the top numbers
+		JUMP testLo			; jump to test lower bytes
+
+;;==============TESTING LOW SWITCH VALUES==============================================================================================================================
+
+        highLo: ADD s4, 01			; increment counter for total number of 1's
+	 lowLo: SR0 s2				; rotate s2
+		COMPARE s5, 08			; compare BREAK counter to 8. if equal to 8 then this loop is done
+		JUMP Z, rstBREAK		; if BREAK == 8, then move on to test high values
+	testLo: TEST s2, 01			; test LSB of s2
+		ADD s5, 01			; increment BREAK counter
+		JUMP C, highLo			; if s2 LSB is not zero, go to increment counter
+		JUMP Z, lowLo			; if s2 LSB is zero, go to rotate s2
+
+;;==============TESTING HIGH SWITCH VALUES=============================================================================================================================
+
+      rstBREAK: LOAD s5, 00			; reset BREAK counter back to zero
+		JUMP testHi
+
+;;==============RESET BREAK COUNTER===================================================================================================================================
+
+	highHi: ADD s4, 01			; increment counter for total number of 1's
+	 lowHi: SR0 s3				; rotate s2
+		COMPARE s5, 08			; compare BREAK counter to 8. if equal to 8 then this loop is done
+		JUMP Z, dispOnes		; if BREAK == 8, then move on to test high values
+	testHi:	TEST s3, 01			; test LSB of s2
+		ADD s5, 01			; increment BREAK counter
+		JUMP C, highHi			; if s2 LSB is not zero, go to increment counter
+		JUMP Z, lowHi			; if s2 LSB is zero, go to rotate s2
+
+;;=============DISPLAY SUM OF 1's=======================================================================================================================================
+      dispOnes: OUTPUT s4, leds_lo	  	; put lo led values
+                JUMP loop                       ; go back and repeat
+;;============================================================================
+;;
+;;============================================================================
