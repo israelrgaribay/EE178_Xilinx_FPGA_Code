@@ -1,0 +1,151 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 09/08/2017 07:58:48 PM
+// Design Name: 
+// Module Name: SSD_multiplex
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+module quad_seven_seg (
+    input wire clk,
+    input wire [3:0] val3,
+    input wire dot3,
+    input wire [3:0] val2,
+    input wire dot2,
+    input wire [3:0] val1,
+    input wire dot1,
+    input wire [3:0] val0,
+    input wire dot0,
+    output reg an3 = 0,
+    output reg an2 = 0,
+    output reg an1 = 0,
+    output reg an0 = 0,
+    output reg ca = 0,
+    output reg cb = 0,
+    output reg cc = 0,
+    output reg cd = 0,
+    output reg ce = 0,
+    output reg cf = 0,
+    output reg cg = 0,
+    output reg dp = 0
+    );
+    reg [16:0] slow = 0;
+    reg [3:0] counter = 0;
+//First Insantiate the Clock and Begging a 4-bit counter
+    always @ (posedge clk) begin 
+    slow <= slow + 1;  
+    if ((slow & 17'b11111111111111111) == 17'b11111111111111111) begin
+        counter <= counter + 1'b1;
+        end
+    if (counter >= 4'b0100) begin
+        counter <= 4'b0000;
+        end
+    end
+    
+    always @ * begin //multiplexing between each
+    case (counter)
+        4'b0000:  begin
+            {dp, an3, an2, an1, an0} = {~dot0, 1'b1, 1'b1, 1'b1, 1'b0};
+            case (val0)
+                4'b0000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; end //0
+                4'b0001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //1
+                4'b0010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0}; end //2
+                4'b0011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0}; end //3
+                4'b0100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //4
+                4'b0101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0}; end //5
+                4'b0110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //6
+                4'b0111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //7
+                4'b1000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //8
+                4'b1001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //9
+                4'b1010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //a
+                4'b1011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //B
+                4'b1100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1}; end //C
+                4'b1101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //d
+                4'b1110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0}; end //E
+                4'b1111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0}; end //F
+                default: {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; //display zero on all for er
+                endcase
+            end
+        4'b0001:  begin
+            {dp, an3, an2, an1, an0} = {~dot1, 1'b1, 1'b1, 1'b0, 1'b1};
+            case (val1)
+                4'b0000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; end //0
+                4'b0001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //1
+                4'b0010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0}; end //2
+                4'b0011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0}; end //3
+                4'b0100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //4
+                4'b0101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0}; end //5
+                4'b0110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //6
+                4'b0111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //7
+                4'b1000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //8
+                4'b1001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //9
+                4'b1010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //a
+                4'b1011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //B
+                4'b1100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1}; end //C
+                4'b1101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //d
+                4'b1110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0}; end //E
+                4'b1111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0}; end //F
+                default: {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; //display zero for error
+                endcase
+            end
+        4'b0010:  begin
+            {dp, an3, an2, an1, an0} = {~dot2, 1'b1, 1'b0, 1'b1, 1'b1};
+            case (val2)
+                4'b0000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; end //0
+                4'b0001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //1
+                4'b0010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0}; end //2
+                4'b0011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0}; end //3
+                4'b0100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //4
+                4'b0101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0}; end //5
+                4'b0110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //6
+                4'b0111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //7
+                4'b1000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //8
+                4'b1001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //9
+                4'b1010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //a
+                4'b1011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //B
+                4'b1100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1}; end //C
+                4'b1101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //d
+                4'b1110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0}; end //E
+                4'b1111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0}; end //F
+                default: {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; //display zero for error
+                endcase
+            end
+        4'b0011:  begin
+            {dp, an3, an2, an1, an0} = {~dot3, 1'b0, 1'b1, 1'b1, 1'b1};
+            case (val3)
+                4'b0000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; end //0
+                4'b0001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //1
+                4'b0010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0}; end //2
+                4'b0011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0}; end //3
+                4'b0100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //4
+                4'b0101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0}; end //5
+                4'b0110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //6
+                4'b0111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1}; end //7
+                4'b1000 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //8
+                4'b1001 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0}; end //9
+                4'b1010 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //a
+                4'b1011 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0}; end //B
+                4'b1100 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1}; end //C
+                4'b1101 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0}; end //d
+                4'b1110 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0}; end //E
+                4'b1111 :   begin {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0}; end //F
+                default: {ca, cb, cc, cd, ce, cf, cg} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1}; //display zero for error
+                endcase
+            end
+        default: {an3, an2, an1, an0, ca, cb, cc, cd, ce, cf, cg, dp} = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0};
+    endcase
+    end
+    endmodule
